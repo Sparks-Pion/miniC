@@ -2,3 +2,7 @@
 github_miniC
 github_miniC.pub
 
+error.txt
+result.txt
+*.yy.c
+scanner
