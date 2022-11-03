@@ -1,0 +1,17 @@
+TYPE	:int
+ID	:main
+LP	:(
+RP	:)
+LC	:{
+TYPE	:int
+ID	:i
+ASSIGNOP	:=
+INT	:1
+SEMI	:;
+TYPE	:int
+ID	:j
+ASSIGNOP	:=
+Error type A at Line 4: Mysterious characters '~'
+ID	:i
+SEMI	:;
+RC	:}

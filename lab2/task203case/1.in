@@ -1,0 +1,7 @@
+int main(){
+    int a = 0x123;
+    a--;
+    int b;
+    b-=a;
+    return 0;
+}

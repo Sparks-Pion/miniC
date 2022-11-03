@@ -1,0 +1,10 @@
+int inc(int k)
+{
+ int j;
+ return k+1;
+}
+int main()
+{
+ int i=0;
+ i = inc(i);
+}

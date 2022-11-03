@@ -1,0 +1,12 @@
+'hello!': CHARCON
+'how is it going?': CHARCON
+'i am fine.': CHARCON
+'the following is some garbled.': CHARCON
+'dyejdc[oodyu836]930pod3m,dfje/;fjiejfyueye': CHARCON
+'shuebqbdhh_fye788893\da"': CHARCON
+'(defdf) {dfeacjjid}, 
+dkkf;iepq948djt237cxz;': CHARCON
+'a*b&s%
+w$2G^J#
+
+v@q!': CHARCON

@@ -1,0 +1,4 @@
+    Conflict between rule 2 and token '-' resolved as reduce (%left '-').
+    Conflict between rule 2 and token '+' resolved as shift ('-' < '+').
+    Conflict between rule 1 and token '-' resolved as reduce ('-' < '+').
+    Conflict between rule 1 and token '+' resolved as reduce (%left '+').
