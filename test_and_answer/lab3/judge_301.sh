@@ -1,4 +1,4 @@
-cd /home/cse/miniC/lab3/task301
+cd /home/$(whoami)/miniC/lab3/task301
 if [ -f "foo.output" ];then	
 rm foo.output > /dev/null 2>&1 		#（清除上一次的评测程序）
 fi
@@ -20,5 +20,5 @@ cat error.txt
 else
  grep -E "useless|unused|resolved" foo.output >result.txt							#生成最终的可执行程序文件
 #cat result.txt											#显示程序运行结果
-diff -b result.txt /home/ubuntu/miniC/answers/lab3/task301/answer.txt	
+diff -b result.txt /home/$(whoami)/miniC/answers/lab3/task301/answer.txt	
 fi

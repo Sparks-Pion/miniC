@@ -1,7 +1,10 @@
+#!/usr/bin/env python3
 import os
 import sys
 
-BASE_DIR = "/home/ubuntu/miniC"
+username = os.getlogin()
+
+BASE_DIR = "/home/"+username+"/miniC"
 
 
 def judge(cmd: str, testcase: int) -> str:

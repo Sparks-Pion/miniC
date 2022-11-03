@@ -1,4 +1,4 @@
-cd /home/cse/miniC/lab4/task404
+cd /home/$(whoami)/miniC/lab4/task404
 make clean > /dev/null 2>&1 					#make clean（清除上一次的评测程序）
 touch tokens.txt										#新建文本，准备存放程序输出结果
 touch error.txt											#新建文本，准备存放错误信息										#读取键盘输入到typ中
@@ -20,5 +20,5 @@ lli tokens.txt > tmp
 else
 cat tokens.txt > tmp
 fi
-diff -b tmp /home/ubuntu/miniC/answers/lab4/task404/answer$1.txt
+diff -b tmp /home/$(whoami)/miniC/answers/lab4/task404/answer$1.txt
 fi

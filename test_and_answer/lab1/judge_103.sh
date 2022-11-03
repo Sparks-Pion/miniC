@@ -1,4 +1,4 @@
 #!/bin/bash
-cd /home/cse/miniC/lab1/task103
+cd /home/$(whoami)/miniC/lab1/task103
 #cat lab103.md
-diff -b 3.md /home/ubuntu/miniC/answers/lab1/task103/answer$1.txt
+diff -b 3.md /home/$(whoami)/miniC/answers/lab1/task103/answer$1.txt

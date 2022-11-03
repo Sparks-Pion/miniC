@@ -1,4 +1,4 @@
-cd /home/cse/miniC/lab3/task305
+cd /home/$(whoami)/miniC/lab3/task305
 make clean > /dev/null 2>&1 					        #make clean（清除上一次的评测程序）
 touch tokens.txt										#新建文本，准备存放程序输出结果
 touch error.txt											#新建文本，准备存放错误信息										#读取键盘输入到typ中
@@ -12,5 +12,5 @@ else
 #gcc -o task2 lex.yy.c									#生成最终的可执行程序文件
 ./minic testcase/$1.in > tokens.txt	        	        #执行最终生成的程序
 #cat tokens.txt											#显示程序运行结果
-diff -bB tokens.txt /home/ubuntu/miniC/answers/lab3/task305/answer$1.txt	
+diff -bB tokens.txt /home/$(whoami)/miniC/answers/lab3/task305/answer$1.txt	
 fi
