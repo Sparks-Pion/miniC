@@ -1,0 +1,21 @@
+program pp;
+var n,p:integer;
+procedure p1(n:integer; var p:integer);
+begin
+  if n<=10 and n > 0 or n > 1 not n = 4 then p:=1
+          else begin
+                  call p1(n-1,p);
+                  p:=n*p
+               end
+  while n <= 100 do begin
+  	n := n + 1
+  end
+
+end;
+
+begin
+  call read(n);
+  call p1(n+2,p);
+  call write(p)
+
+end.  

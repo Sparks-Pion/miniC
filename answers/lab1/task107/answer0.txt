@@ -1,0 +1,32 @@
+Type(258):NUM Val=5
+Type(260):ADD
+Type(258):NUM Val=2
+Type(262):MUL
+Type(258):NUM Val=1
+=7
+Type(258):NUM Val=1
+Type(260):ADD
+Type(258):NUM Val=3
+Type(264):EXPO
+Type(258):NUM Val=2
+=10
+Type(261):SUB
+Type(258):NUM Val=5
+Type(260):ADD
+Type(258):NUM Val=3
+Type(261):SUB
+Type(261):SUB
+Type(258):NUM Val=1
+=-1
+Type(261):SUB
+Type(258):NUM Val=2
+Type(264):EXPO
+Type(258):NUM Val=2
+=4
+Type(261):SUB
+Type(258):NUM Val=2
+Type(264):EXPO
+Type(258):NUM Val=2
+Type(264):EXPO
+Type(258):NUM Val=3
+=256

@@ -1,0 +1,12 @@
+TYPE	:int
+ID	:main
+LP	:(
+RP	:)
+LC	:{
+TYPE	:float
+ID	:i
+ASSIGNOP	:=
+FLOAT	:1.05
+ID	:e
+SEMI	:;
+RC	:}

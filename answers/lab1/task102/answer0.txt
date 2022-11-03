@@ -1,0 +1,11 @@
+An identifier: abc
+An integer: 123 (123)
+A float: 12.3 (12.3)
+An identifier: abc123
+An integer: 123 (123)
+An identifier: abc
+A keyword: if
+An identifier: else
+A keyword: then
+An integer: 12 (12)
+An integer: 3 (3)

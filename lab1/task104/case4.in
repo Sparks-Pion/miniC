@@ -1,0 +1,41 @@
+program pp;
+var a, b, c, d, e, f, g, h:integer;
+const var N:integer;
+var arr:array;
+procedure proc();
+begin
+ call write(1);
+end;
+ 
+begin
+ _
+ a :=0;
+ ^
+ b :=1;
+ %
+ c :=2;
+ @
+ d:=3;
+ !
+ e:=4;
+ ~
+ f:=5;
+ $
+ g:=6;
+ \
+ h:=7;
+ arr[0] := a + b * c / d;
+ #
+ c := a+b;
+ & 
+ call write(a);
+ call write(b);
+ call write(c);
+ call write(d);
+ call write(e);
+ call write(f);
+ call write(g);
+ call write(h)
+ 
+end.
+    

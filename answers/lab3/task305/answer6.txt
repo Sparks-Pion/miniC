@@ -1,0 +1,125 @@
+Program (1)
+  ExtDefList (1)
+    ExtDef (1)
+      Specifier (1)
+        TYPE: int
+      FunDec (1)
+        ID: main
+        LP
+        RP
+      CompSt (1)
+        LC
+        DefList (2)
+          Def (2)
+            Specifier (2)
+              TYPE: int
+            DecList (2)
+              Dec (2)
+                VarDec (2)
+                  ID: i
+              COMMA
+              DecList (2)
+                Dec (2)
+                  VarDec (2)
+                    ID: j
+                COMMA
+                DecList (2)
+                  Dec (2)
+                    VarDec (2)
+                      ID: k
+            SEMI
+        StmtList (3)
+          Stmt (3)
+            Exp (3)
+              Exp (3)
+                ID: i
+              ASSIGNOP
+              Exp (3)
+                INT: 0
+            SEMI
+          StmtList (4)
+            Stmt (4)
+              IF
+              LP
+              Exp (4)
+                Exp (4)
+                  ID: i
+                RELOP
+                Exp (4)
+                  INT: 1
+              RP
+              Stmt (4)
+                CompSt (4)
+                  LC
+                  StmtList (5)
+                    Stmt (5)
+                      Exp (5)
+                        Exp (5)
+                          ID: j
+                        ASSIGNOP
+                        Exp (5)
+                          INT: 2
+                      SEMI
+                  RC
+              ELSE
+              Stmt (6)
+                CompSt (6)
+                  LC
+                  StmtList (7)
+                    Stmt (7)
+                      Exp (7)
+                        Exp (7)
+                          ID: k
+                        ASSIGNOP
+                        Exp (7)
+                          INT: 3
+                      SEMI
+                  RC
+            StmtList (9)
+              Stmt (9)
+                WHILE
+                LP
+                Exp (9)
+                  Exp (9)
+                    ID: i
+                  RELOP
+                  Exp (9)
+                    INT: 1
+                RP
+                Stmt (9)
+                  CompSt (9)
+                    LC
+                    StmtList (10)
+                      Stmt (10)
+                        Exp (10)
+                          Exp (10)
+                            ID: k
+                          ASSIGNOP
+                          Exp (10)
+                            INT: 4
+                        SEMI
+                      StmtList (11)
+                        Stmt (11)
+                          Exp (11)
+                            Exp (11)
+                              ID: i
+                            ASSIGNOP
+                            Exp (11)
+                              Exp (11)
+                                ID: i
+                              PLUS
+                              Exp (11)
+                                INT: 1
+                          SEMI
+                        StmtList (12)
+                          Stmt (12)
+                            BREAK
+                            SEMI
+                    RC
+              StmtList (14)
+                Stmt (14)
+                  RETURN
+                  Exp (14)
+                    INT: 0
+                  SEMI
+        RC

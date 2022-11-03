@@ -1,0 +1,12 @@
+A float: 123. (123)
+An identifier: ifa
+Unrecognized character: _
+A keyword: if
+An identifier: else
+A float: 0123.4 (123.4)
+An integer: 012 (12)
+Unrecognized character: ?
+An identifier: a
+An integer: 1 (1)
+An identifier: n
+An identifier: n1

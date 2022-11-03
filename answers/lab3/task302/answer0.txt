@@ -1,0 +1,24 @@
+Specifier
+FunDec
+Specifier
+VarDec
+INT
+Dec
+DecList
+Def
+Specifier
+VarDec
+Error type A at Line 4: Mysterious characters '~'
+ID
+Dec
+DecList
+Def
+DefList
+DefList
+DefList
+StmtList
+CompSt
+ExtDef
+ExtDefList
+ExtDefList
+Program

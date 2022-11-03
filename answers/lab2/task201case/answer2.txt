@@ -1,0 +1,15 @@
+TYPE	:int
+ID	:inc
+LP	:(
+RP	:)
+LC	:{
+TYPE	:int
+ID	:i
+SEMI	:;
+ID	:i
+ASSIGNOP	:=
+ID	:i
+PLUS	:+
+INT	:1
+SEMI	:;
+RC	:}
