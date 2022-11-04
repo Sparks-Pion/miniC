@@ -11,5 +11,5 @@ cat error.txt
 else
 make > error.txt 2>&1						#用gcc编译生成可执行文件
 ./scanner <case$1.in > result.txt  	#执行最终生成的程序
-diff -b result.txt /home/$(whoami)/miniC/answers/lab1/task104/answer$1.txt
+diff -b result.txt /home/$(whoami)/miniC/answers/lab1/task104/answer$1.txt 2>&1	#比较输出结果
 fi  

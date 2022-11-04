@@ -9,6 +9,7 @@ BASE_DIR = "/home/"+username+"/miniC"
 
 def judge(cmd: str, testcase: int) -> str:
     res = os.popen(cmd+' '+str(testcase))
+    print("testcase: "+str(testcase))
     return res.read()
 
 
