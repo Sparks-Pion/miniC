@@ -2,10 +2,13 @@
 github_miniC
 github_miniC.pub
 
-error.txt
-result.txt
+*.o
+*.txt
 *.yy.c
 *.yy.h
 *.tab.c
 *.tab.h
+
 scanner
+minic
+
