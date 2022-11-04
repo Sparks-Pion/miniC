@@ -24,10 +24,14 @@ calclist:
 	%empty
 	|calclist exp EOL {printf("=%.10g\n",$2);}
 exp:term
-	;
+    |exp ADD term {$$=$1+$3;}
+    |exp SUB term {$$=$1-$3;}
+    ;
 
 term:NUM
-	;
+    |term MUL NUM {$$=$1*$3;}
+    |term DIV NUM {$$=$1/$3;}
+    ;
 
 
 
