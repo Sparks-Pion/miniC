@@ -5,5 +5,7 @@ github_miniC.pub
 error.txt
 result.txt
 *.yy.c
+*.yy.h
 *.tab.c
+*.tab.h
 scanner

@@ -48,7 +48,14 @@ exp:term
 	;
 
 term:NUM
-	;
+    |SUB NUM {$$=-$2;}
+	|term MUL term {$$=$1*$3;}
+    |term DIV term {$$=$1/$3;}
+    |term EXPO term {$$=pow($1,$3);}
+    |LP exp RP {$$=$2;}
+    |SUB LP exp RP{$$=-$3;}
+    |error {}
+    ;
 %%
 
 int main(int args,char **argv){
