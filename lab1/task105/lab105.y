@@ -9,6 +9,11 @@
 %define api.value.type {double}
 %token NUM
 
+%left '+' '-'
+%left '*' '/'
+%right 'n'
+%right '^'
+
 %% 
 /* Grammar rules and actions follow.  */
 input:
@@ -25,7 +30,12 @@ line:
 exp:
   NUM           { $$ = $1;           }
  /* begin */
-
+| exp NUM '+'   { $$ = $1 + $2;      }
+| exp NUM '-'   { $$ = $1 - $2;      }
+| exp NUM '*'   { $$ = $1 * $2;      }
+| exp NUM '/'   { $$ = $1 / $2;      }
+| exp NUM '^'   { $$ = pow($1, $2);  }
+| exp 'n'       { $$ = - $1;         }
  /* end */
 ;
 
