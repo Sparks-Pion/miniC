@@ -9,6 +9,9 @@ github_miniC.pub
 *.tab.c
 *.tab.h
 
+token.*
+main.*
+
 scanner
 minic
 
