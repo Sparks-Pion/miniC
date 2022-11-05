@@ -38,7 +38,11 @@ void flexout(std::string name,std::string value){
 "<="                            {flexout("RELOP",yytext);}
 "<"                             {flexout("RELOP",yytext);}   
 "!="                            {flexout("RELOP",yytext);}
+"++"                            {flexout("PLUSPLUS",yytext);}
+"+="                            {flexout("PLUSASS",yytext);}
 "+"                             {flexout("PLUS",yytext);}
+"--"                            {flexout("MINUSMINUS",yytext);}
+"-="                            {flexout("MINUSASS",yytext);}
 "-"                             {flexout("MINUS",yytext);}
 "*"                             {flexout("STAR",yytext);}
 "/"                             {flexout("DIV",yytext);}
