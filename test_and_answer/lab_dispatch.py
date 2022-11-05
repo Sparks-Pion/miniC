@@ -9,8 +9,10 @@ BASE_DIR = "/home/"+username+"/miniC"
 
 def judge(cmd: str, testcase: int) -> str:
     res = os.popen(cmd+' '+str(testcase))
+    res = res.read()
     print("testcase: "+str(testcase))
-    return res.read()
+    print("res: " + res)
+    return res
 
 
 def lab1(task_id: str) -> str:
