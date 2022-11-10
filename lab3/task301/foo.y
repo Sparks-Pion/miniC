@@ -5,9 +5,8 @@
 	char *sval;
 } //**begin***//
 %token <ival>NUM
-%token <sval>STR
 %nterm <ival>exp
-%nterm <sval>useless
+%left '-'
 %left '+'
 %%
 exp:
@@ -15,5 +14,4 @@ exp:
 	|exp '-' exp
 	|NUM
 	;
-useless: STR;
 %% //**end**//
