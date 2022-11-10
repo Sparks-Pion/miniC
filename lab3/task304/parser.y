@@ -105,112 +105,112 @@ extern int yylex(void);
 /*High-level Definitions*/
 program: ExtDefList {p=new NProgram($1);if($1) p->line=$1->line;} /*显示语法树*/
         ;
-ExtDefList: {  $$=nullptr;}
+ExtDefList: {$$=nullptr;}
         | ExtDef ExtDefList {$$=new NExtDefList(*$1,$2); $$->line=$1->line;}
         ;
-ExtDef: Specifier ExtDecList SEMI {}
-        | Specifier SEMI {} 
-        | Specifier FunDec CompSt {}
+ExtDef: Specifier ExtDecList SEMI {$$=new NExtDef(*$1,$2); $$->line=$1->line;}
+        | Specifier SEMI {$$=new NExtDef(*$1); $$->line=$1->line;}
+        | Specifier FunDec CompSt {$$=new NExtDef(*$1,$2,$3); $$->line=$1->line;}
         ;
-ExtDecList: VarDec {}
-        | VarDec COMMA ExtDecList {}
+ExtDecList: VarDec {$$=new NExtDecList(*$1, nullptr); $$->line=$1->line;}
+        | VarDec COMMA ExtDecList {$$=new NExtDecList(*$1,$3); $$->line=$1->line;}
         ;
 
 /*Specifiers*/
-Specifier: TYPE {}   
-        | StructSpecifier {}   
+Specifier: TYPE {$$=new NSpecifier(*(new std::string($1))); $$->line=yylineno;}
+        | StructSpecifier {$$=$1;}
         ;
 
-StructSpecifier: STRUCT OptTag LC DefList RC {}   
-        | STRUCT Tag {}   
+StructSpecifier: STRUCT OptTag LC DefList RC {$$=new NStructSpecifier($2,$4); $$->line=$1;}   
+        | STRUCT Tag {$$=new NStructSpecifier($2); $$->line=$1;}   
         ;
 
-OptTag: ID {}   
-        | {}   
+OptTag: ID {$$=new NIdentifier($1); $$->line=yylineno;}
+        | {$$=nullptr;}   
         ;
 
-Tag: ID {}   
+Tag: ID {$$=new NIdentifier($1); $$->line=yylineno;}   
         ;
 
 /*Declarators*/
-VarDec:  ID {}   //ID结点，标识符符号串存放结点的type_id
-        | VarDec LB INT RB {}
+VarDec:  ID {$$=new NVarDec(*(new NIdentifier($1))); $$->line=yylineno;}   //ID结点，标识符符号串存放结点的type_id
+        | VarDec LB INT RB {$$=$1; $$->v.push_back($3);}   //数组
         ;
-FunDec: ID LP VarList RP {}
-        | ID LP RP {}
+FunDec: ID LP VarList RP {$$=new NFunDec(*(new NIdentifier($1)),$3); $$->line=yylineno;}
+        | ID LP RP {$$=new NFunDec(*(new NIdentifier($1)),nullptr); $$->line=yylineno;}
         ;
-VarList: ParamDec {}
-        | ParamDec COMMA VarList {}
+VarList: ParamDec {$$=new NVarList(*$1, nullptr); $$->line=$1->line;}
+        | ParamDec COMMA VarList {$$=new NVarList(*$1,$3); $$->line=$1->line;}
         ;
-ParamDec: Specifier VarDec {}
+ParamDec: Specifier VarDec {$$=new NParamDec(*$1,*$2); $$->line=$1->line;}
         ;
 
 /*Statements*/
-CompSt:   LC DefList StmtList RC {}
+CompSt:   LC DefList StmtList RC {$$=new NCompSt($2,$3); $$->line=$1;}
         ;
-StmtList: {}  
-        | Stmt StmtList  {}
+StmtList: {$$=nullptr;}  
+        | Stmt StmtList  {$$=new NStmtList(*$1,$2); $$->line=$1->line;}
         ;
-Stmt:     Exp SEMI {}
-        | CompSt {}      //复合语句结点直接最为语句结点，不再生成新的结点
-        | RETURN Exp SEMI {}
-        | IF LP Exp RP Stmt %prec LOWER_THEN_ELSE   {}
-        | IF LP Exp RP Stmt ELSE Stmt {}
-        | WHILE LP Exp RP Stmt {}
-        | BREAK SEMI {}
+Stmt:     Exp SEMI {$$=new NExpStmt(*$1); $$->line=$1->line;}
+        | CompSt {$$=new NCompStStmt(*$1);} //复合语句结点直接最为语句结点，不再生成新的结点      
+        | RETURN Exp SEMI {$$=new NRetutnStmt(*$2); $$->line=$1;}
+        | IF LP Exp RP Stmt %prec LOWER_THEN_ELSE   {$$=new NIfStmt(*$3,*$5); $$->line=$1;}
+        | IF LP Exp RP Stmt ELSE Stmt {$$=new NIfElseStmt(*$3,*$5,*$7); $$->line=$1;}
+        | WHILE LP Exp RP Stmt {$$=new NWhileStmt(*$3,*$5); $$->line=$1;}
+        | BREAK SEMI {$$=new NBreakStmt(); $$->line=$1;}
         ;
 
 /*Local Definitions*/
-DefList: {}
-        | Def DefList {}
+DefList: {$$=nullptr;}
+        | Def DefList {$$=new NDefList(*$1,$2); $$->line=$1->line;}
         ;
-Def: Specifier DecList SEMI {}
+Def: Specifier DecList SEMI {$$=new NDef(*$1,$2); $$->line=$1->line;}
         ;
 
-DecList:  Dec  {}
-        | Dec COMMA DecList  {}
+DecList:  Dec  {$$=new NDecList(*$1, nullptr); $$->line=$1->line;}
+        | Dec COMMA DecList  {$$=new NDecList(*$1,$3); $$->line=$1->line;}
         ;
-Dec:      VarDec  {}
-        | VarDec ASSIGNOP Exp  {}
+Dec:      VarDec  {$$=new NDec(*$1, nullptr); $$->line=$1->line;}
+        | VarDec ASSIGNOP Exp  {$$=new NDec(*$1,$3); $$->line=$1->line;}
         ;
 
 /*Expressions*/
-Exp:      Exp ASSIGNOP Exp {}//$$结点type_id空置未用，正好存放运算符
+Exp:      Exp ASSIGNOP Exp {$$=new NAssignment(*(new std::string("ASSIGNOP")),*$1,ASSIGNOP,*$3);$$->line=$1->line;}//$$结点type_id空置未用，正好存放运算符
         
-        | Exp PLUSASS Exp   {}//复合赋值运算
-        | Exp MINUSASS Exp   {}
-        | Exp STARASS Exp   {}
-        | Exp DIVASS Exp   {}
+        | Exp PLUSASS Exp   {$$=new NAssignment(*(new std::string("PLUSASS")),*$1,PLUSASS,*$3);$$->line=$1->line;}//复合赋值运算
+        | Exp MINUSASS Exp  {$$=new NAssignment(*(new std::string("MINUSASS")),*$1,MINUSASS,*$3);$$->line=$1->line;}
+        | Exp STARASS Exp   {$$=new NAssignment(*(new std::string("STARASS")),*$1,STARASS,*$3);$$->line=$1->line;}
+        | Exp DIVASS Exp    {$$=new NAssignment(*(new std::string("DIVASS")),*$1,DIVASS,*$3);$$->line=$1->line;}
 
-        | PLUSPLUS Exp %prec UPLUSPLUS   {}//这里利用BISON %prec表示和UMINUS同优先级
-        | MINUSMINUS Exp %prec UMINUSMINUS   {}//这里利用BISON %prec表示和UMINUS同优先级
-        | Exp PLUSPLUS   {}//这里利用BISON %prec表示和UMINUS同优先级
-        | Exp MINUSMINUS  {}//这里利用BISON %prec表示和UMINUS同优先级
+        | PLUSPLUS Exp %prec UPLUSPLUS   {$$=new NSingleOperator(*(new std::string("PLUSPLUS")),PLUSPLUS,*$2);$$->line=$1;}//这里利用BISON %prec表示和UMINUS同优先级
+        | MINUSMINUS Exp %prec UMINUSMINUS   {$$=new NSingleOperator(*(new std::string("MINUSMINUS")),MINUSMINUS,*$2);$$->line=$1;}//这里利用BISON %prec表示和UMINUS同优先级
+        | Exp PLUSPLUS   {$$=new NSingleOperator(*(new std::string("PLUSPLUS")),PLUSPLUS,*$1);$$->line=$1->line;}//这里利用BISON %prec表示和UMINUS同优先级
+        | Exp MINUSMINUS  {$$=new NSingleOperator(*(new std::string("MINUSMINUS")),MINUSMINUS,*$1);$$->line=$1->line;}//这里利用BISON %prec表示和UMINUS同优先级
 
-        | Exp AND Exp   {}
-        | Exp OR Exp    {}
-        | Exp RELOP Exp {}  //词法分析关系运算符号自身值保存在$2中
-        | Exp PLUS Exp  {}
-        | Exp MINUS Exp {}
-        | Exp STAR Exp  {}
-        | Exp DIV Exp   {}
+        | Exp AND Exp   {$$=new NBinaryOperator(*(new std::string("AND")),*$1,AND,*$3);$$->line=$1->line;}
+        | Exp OR Exp    {$$=new NBinaryOperator(*(new std::string("OR")),*$1,OR,*$3);$$->line=$1->line;}
+        | Exp RELOP Exp {$$=new NBinaryOperator(*(new std::string("RELOP")),*$1,RELOP,*$3);$$->line=$1->line;}  //词法分析关系运算符号自身值保存在$2中
+        | Exp PLUS Exp  {$$=new NBinaryOperator(*(new std::string("PLUS")),*$1,PLUS,*$3);$$->line=$1->line;}
+        | Exp MINUS Exp {$$=new NBinaryOperator(*(new std::string("MINUS")),*$1,MINUS,*$3);$$->line=$1->line;}
+        | Exp STAR Exp  {$$=new NBinaryOperator(*(new std::string("STAR")),*$1,STAR,*$3);$$->line=$1->line;}
+        | Exp DIV Exp   {$$=new NBinaryOperator(*(new std::string("DIV")),*$1,DIV,*$3);$$->line=$1->line;}
         
-        | Exp MOD Exp   {}
+        | Exp MOD Exp   {$$=new NBinaryOperator(*(new std::string("MOD")),*$1,MOD,*$3);$$->line=$1->line;}
         
-        | LP Exp RP     {}
-        | MINUS Exp %prec UMINUS   {}//这里利用BISON %prec表示和UMINUS同优先级 相当于虚拟出一个运算符
-        | NOT Exp       {}
-        | ID LP Args RP {}
-        | ID LP RP      {}
-        | Exp LB Exp RB {}
-        | Exp DOT ID    {}
-        | ID            {}
+        | LP Exp RP     {$$=new NParenOperator(*$2);}
+        | MINUS Exp %prec UMINUS   {$$=new NSingleOperator(*(new std::string("MINUS")),MINUS,*$2);$$->line=$1;}//这里利用BISON %prec表示和UMINUS同优先级 相当于虚拟出一个运算符
+        | NOT Exp       {$$=new NSingleOperator(*(new std::string("NOT")),NOT,*$2);$$->line=$1;}
+        | ID LP Args RP {$$=new NMethodCall(*(new NIdentifier($1)),$3); $$->line=yylineno;}
+        | ID LP RP      {$$=new NMethodCall(*(new NIdentifier($1)),nullptr); $$->line=yylineno;}
+        | Exp LB Exp RB {$$=new NListOperator(*$1,*$3); $$->line=$1->line;}
+        | Exp DOT ID    {$$=new NDotOperator(*$1,*(new NIdentifier($3))); $$->line=yylineno;}
+        | ID            {$$=new NIdentifier($1); $$->line=yylineno;}
         | INT           {$$=new NInteger($1);$$->line=yylineno;}
-        | FLOAT         {}
-        | CHAR          {}
+        | FLOAT         {$$=new NFloat($1);$$->line=yylineno;}
+        | CHAR          {$$=new NChar($1);$$->line=yylineno;}
         ;
-Args:   Exp COMMA Args {}
-        | Exp {}
+Args:   Exp COMMA Args {$$=new NArgs(*$1,$3); $$->line=$1->line;}
+        | Exp {$$=new NArgs(*$1, nullptr); $$->line=$1->line;}
         ;
 
 %%
