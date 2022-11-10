@@ -40,14 +40,124 @@ extern int yylex(void);
 %token <type_float> FLOAT               //指定ID的语义值是type_float，由词法分析得到的float
 %token <type_char> CHAR
 %token LP RP LC RC LB RB SEMI COMMA     //用bison对该文件编译时，带参数-d，生成的exp.tab.h中给这些单词进行编码，可在lex.l中包含parser.tab.h使用这些单词种类码
-%token DOT PLUS MINUS STAR DIV MOD ASSIGNOP AND OR NOT IF BREAK ELSE WHILE RETURN PLUSASS MINUSASS STARASS DIVASS PLUSPLUS MINUSMINUS
+%token DOT PLUS MINUS STAR DIV MOD ASSIGNOP AND OR NOT IF BREAK ELSE WHILE RETURN PLUSASS MINUSASS STARASS DIVASS MODASS PLUSPLUS MINUSMINUS
 //由低到高的定义优先级
+%right ASSIGNOP PLUSASS MINUSASS STARASS DIVASS MODASS
+%left OR
+%left AND
+%left RELOP
+%left PLUS MINUS
+%left STAR DIV
+%right NOT UMINUS PLUSPLUS MINUSMINUS
+%left LP RP LB RB DOT
 
-
+%nonassoc LOWER_THEN_ELSE
+%nonassoc ELSE
 %%
 /*High-level Definitions*/ /*Begin*/
 program: ExtDefList {std::cout<<"Program"<<std::endl;} /*显示规则对应非终结符*/
         ;
+
+ExtDefList: ExtDef ExtDefList {std::cout<<"ExtDefList"<<std::endl;}
+           | /*empty*/ {std::cout<<"ExtDefList"<<std::endl;}
+           ;
+    
+ExtDef: Specifier ExtDecList SEMI {std::cout<<"ExtDef"<<std::endl;}
+         | Specifier SEMI {std::cout<<"ExtDef"<<std::endl;}
+         | Specifier FunDec CompSt {std::cout<<"ExtDef"<<std::endl;}
+         ;
+
+ExtDecList: VarDec {std::cout<<"ExtDecList"<<std::endl;}
+           | VarDec COMMA ExtDecList {std::cout<<"ExtDecList"<<std::endl;}
+           ;
+
+/*Specifier*/
+Specifier: TYPE {std::cout<<"Specifier"<<std::endl;}
+          | StructSpecifier {std::cout<<"Specifier"<<std::endl;}
+          ;
+
+StructSpecifier: STRUCT OptTag LC DefList RC {std::cout<<"StructSpecifier"<<std::endl;}
+                | STRUCT Tag {std::cout<<"StructSpecifier"<<std::endl;}
+                ;
+
+OptTag: ID {std::cout<<"OptTag"<<std::endl;}
+         | /*empty*/ {std::cout<<"OptTag"<<std::endl;}
+         ;
+    
+Tag: ID {std::cout<<"Tag"<<std::endl;}
+
+/*Declarators*/
+VarDec: ID {std::cout<<"VarDec"<<std::endl;}
+       | VarDec LB INT RB {std::cout<<"VarDec"<<std::endl;}
+       ;
+
+FunDec: ID LP VarList RP {std::cout<<"FunDec"<<std::endl;}
+         | ID LP RP {std::cout<<"FunDec"<<std::endl;}
+         ;
+
+VarList: ParamDec COMMA VarList {std::cout<<"VarList"<<std::endl;}
+        | ParamDec {std::cout<<"VarList"<<std::endl;}
+        ;
+
+ParamDec: Specifier VarDec {std::cout<<"ParamDec"<<std::endl;}
+         ;
+
+/*Statements*/
+CompSt: LC DefList StmtList RC {std::cout<<"CompSt"<<std::endl;}
+       ;
+
+StmtList: Stmt StmtList {std::cout<<"StmtList"<<std::endl;}
+         | /*empty*/ {std::cout<<"StmtList"<<std::endl;}
+         ;
+
+Stmt: Exp SEMI {std::cout<<"Stmt"<<std::endl;}
+        | CompSt {std::cout<<"Stmt"<<std::endl;}
+        | RETURN Exp SEMI {std::cout<<"Stmt"<<std::endl;}
+        | IF LP Exp RP Stmt %prec LOWER_THEN_ELSE {std::cout<<"Stmt"<<std::endl;}
+        | IF LP Exp RP Stmt ELSE Stmt {std::cout<<"Stmt"<<std::endl;}        
+        | WHILE LP Exp RP Stmt {std::cout<<"Stmt"<<std::endl;}
+        ;
+
+/*Local Definitions*/
+DefList: Def DefList {std::cout<<"DefList"<<std::endl;}
+        | /*empty*/ {std::cout<<"DefList"<<std::endl;}
+        ;
+
+Def: Specifier DecList SEMI {std::cout<<"Def"<<std::endl;}
+    ;
+
+DecList: Dec {std::cout<<"DecList"<<std::endl;}
+        | Dec COMMA DecList {std::cout<<"DecList"<<std::endl;}
+        ;
+
+Dec: VarDec {std::cout<<"Dec"<<std::endl;}
+    | VarDec ASSIGNOP Exp {std::cout<<"Dec"<<std::endl;}
+    ;
+
+/*Expressions*/
+Exp: Exp ASSIGNOP Exp {std::cout<<"Exp"<<std::endl;}
+    | Exp AND Exp {std::cout<<"Exp"<<std::endl;}
+    | Exp OR Exp {std::cout<<"Exp"<<std::endl;}
+    | Exp RELOP Exp {std::cout<<"Exp"<<std::endl;}
+    | Exp PLUS Exp {std::cout<<"Exp"<<std::endl;}
+    | Exp MINUS Exp {std::cout<<"Exp"<<std::endl;}
+    | Exp STAR Exp {std::cout<<"Exp"<<std::endl;}
+    | Exp DIV Exp {std::cout<<"Exp"<<std::endl;}
+    | LP Exp RP {std::cout<<"Exp"<<std::endl;}
+    | MINUS Exp %prec UMINUS {std::cout<<"Exp"<<std::endl;}
+    | NOT Exp {std::cout<<"Exp"<<std::endl;}
+    | ID LP Args RP {std::cout<<"Exp"<<std::endl;}
+    | ID LP RP {std::cout<<"Exp"<<std::endl;}
+    | Exp LB Exp RB {std::cout<<"Exp"<<std::endl;}
+    | Exp DOT ID {std::cout<<"Exp"<<std::endl;}
+    | ID {std::cout<<"ID"<<std::endl;}
+    | INT {std::cout<<"INT"<<std::endl;}
+    | FLOAT {std::cout<<"FLOAT"<<std::endl;}
+    ;
+
+Args: Exp COMMA Args {std::cout<<"Args"<<std::endl;}
+     | Exp {std::cout<<"Args"<<std::endl;}
+     ;
 
 %%
 /*End*/
