@@ -13,34 +13,14 @@ define dso_local i32 @main() #0 {
   %3 = load i32, i32* %2, align 4
   %4 = call i32 @putchar(i32 %3)
   ;begin
-  ; U
-  store i32 85, i32* %2, align 4
-  %5 = load i32, i32* %2, align 4
-  %6 = call i32 @putchar(i32 %5)
-  ; S
-  store i32 83, i32* %2, align 4
-  %7 = load i32, i32* %2, align 4
-  %8 = call i32 @putchar(i32 %7)
-  ; T
-  store i32 84, i32* %2, align 4
-  %9 = load i32, i32* %2, align 4
-  %10 = call i32 @putchar(i32 %9)
-  ; C
-  store i32 67, i32* %2, align 4
-  %11 = load i32, i32* %2, align 4
-  %12 = call i32 @putchar(i32 %11)
-  ; S
-  store i32 83, i32* %2, align 4
-  %13 = load i32, i32* %2, align 4
-  %14 = call i32 @putchar(i32 %13)
-  ;E
-  store i32 69, i32* %2, align 4
-  %15 = load i32, i32* %2, align 4
-  %16 = call i32 @putchar(i32 %15)
+  call i32 @putchar(i32 85)
+  call i32 @putchar(i32 83)
+  call i32 @putchar(i32 84)
+  call i32 @putchar(i32 67)
+  call i32 @putchar(i32 83)
+  call i32 @putchar(i32 69)
   ;end
-  store i32 10, i32* %2, align 4
-  %17 = load i32, i32* %2, align 4
-  %18 = call i32 @putchar(i32 %17)
+  call i32 @putchar(i32 10)
   ret i32 0
 }
 
