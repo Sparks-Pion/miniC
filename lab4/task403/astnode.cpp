@@ -1,6 +1,6 @@
 #include "astnode.h"
 
-#define DEBUG
+// #define DEBUG
 
 extern int spaces;
 extern std::unique_ptr<LLVMContext> theContext;
