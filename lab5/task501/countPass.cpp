@@ -10,7 +10,7 @@ struct CountPass : public FunctionPass {
   CountPass() : FunctionPass(ID) {}
 
   bool runOnFunction(Function &F) override {
-    outs().write_escaped(F.getName()) << '\n';
+    outs() << F.getName() << ':'<<F.getBasicBlockList().size() << '\n';
     return false;
   }
 };
