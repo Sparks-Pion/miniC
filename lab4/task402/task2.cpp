@@ -96,12 +96,41 @@ int main(int argc, char *argv[]) {
   //根据输入的单字符，判断，如果是'a'，则输出'Y'，否则输出'N'。
   //设置返回类型
   //begin
-  
+  Type *retType = Type::getInt32Ty(*theContext);
+  FunctionType *mainType = FunctionType::get(retType, false);
+  Function *mainFunc = Function::Create(mainType, Function::ExternalLinkage, 
+                                        "main", theModule.get());
 
+  BasicBlock *bb = BasicBlock::Create(*theContext, "entry", mainFunc);
+  BasicBlock *thenBB = BasicBlock::Create(*theContext, "then", mainFunc);
+  BasicBlock *elseBB = BasicBlock::Create(*theContext, "else", mainFunc);
+  BasicBlock *returnBB = BasicBlock::Create(*theContext, "return", mainFunc);
+  // entry:
+  builder->SetInsertPoint(bb);
+  // %a_get = call i32 @getchar()
+  Value *a_get = builder->CreateCall(getFunc,std::vector<Value *>{}, "a_get");
+  // %a_eq = icmp eq i32 %a_get, 97('a')
+  Value *a_eq = builder->CreateICmpEQ(a_get, builder->getInt32('a'), "a_eq");
+  // br %a_eq, label %then, label %else
+  builder->CreateCondBr(a_eq, thenBB, elseBB);
+  // then:
+  builder->SetInsertPoint(thenBB);
+  // call i32 @putchar(i32 89('Y'))
+  builder->CreateCall(putFunc, {builder->getInt32('Y')});
+  // br label %return
+  builder->CreateBr(returnBB);
+  // else:
+  builder->SetInsertPoint(elseBB);
+  // call i32 @putchar(i32 78('N'))
+  builder->CreateCall(putFunc, {builder->getInt32('N')});
+  // br label %return
+  builder->CreateBr(returnBB);
+  // return :
+  builder->SetInsertPoint(returnBB);
   // end
   //设置返回值
-  builder->CreateRet(const_0);
-  verifyFunction(*f);
+  builder->CreateRet(builder->getInt32(0));
+  verifyFunction(*mainFunc);
   // Run the optimizer on the function.
   // theFPM->run(*f);
   //输出

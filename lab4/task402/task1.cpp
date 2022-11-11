@@ -124,7 +124,12 @@ int main(int argc, char *argv[]) {
   //判断参数是否符合 自行处理
   Value *callputchar = builder->CreateCall(calleeF, argsV, "callputchar");
   // begin
-  
+  builder->CreateCall(calleeF, {builder->getInt32('U')});
+  builder->CreateCall(calleeF, {builder->getInt32('S')});
+  builder->CreateCall(calleeF, {builder->getInt32('T')});
+  builder->CreateCall(calleeF, {builder->getInt32('C')});
+  builder->CreateCall(calleeF, {builder->getInt32('S')});
+  builder->CreateCall(calleeF, {builder->getInt32('E')});
   // end
   //设置返回值
   builder->CreateRet(const_1);
