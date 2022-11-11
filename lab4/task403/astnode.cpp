@@ -1,13 +1,15 @@
 #include "astnode.h"
 
+#define DEBUG
+
 extern int spaces;
 extern std::unique_ptr<LLVMContext> theContext;
 extern std::unique_ptr<Module> theModule;
 extern std::unique_ptr<IRBuilder<>> builder;
-extern std::map<std::string, AllocaInst *> namedValues;
+extern std::map<std::string, AllocaInst *> namedValues; // 存当前函数局部变量
 extern std::unique_ptr<legacy::FunctionPassManager> theFPM;
 extern int grammererror;
-extern std::map<std::string, AllocaInst *> curNamedValues;
+extern std::map<std::string, AllocaInst *> curNamedValues; // 存当前所有变量
 
 extern BasicBlock *continueBasicBlock;
 void printspaces() {
@@ -23,6 +25,7 @@ void printSemanticError(int type, int line, std::string info = "") {
   grammererror = 1;
   std::cout << "Error type " << type << " at Line " << line << "."
             << std::endl;
+  exit(0);
 }
 
 int parseNIdentifier(NIdentifier &nIdentifier) {
@@ -67,6 +70,7 @@ Function *getFunction(std::string Name) {
   // First, see if the function has already been added to the current module.
   if (auto *F = theModule->getFunction(Name))
     return F;
+  return nullptr;
 }
 
 /// CreateEntryBlockAlloca - Create an alloca instruction in the entry block
@@ -161,10 +165,10 @@ int NMethodCall::parse() {
   std::cout << "LP" << std::endl;
   if (nargs) {
     nargs->parse();
-  }
+  }  
   printspaces();
   std::cout << "RP" << std::endl;
-  spaces -= 2;
+  spaces -= 2;   
   return 0;
 }
 int NParenOperator::parse() {
@@ -544,62 +548,194 @@ int NProgram::parse() {
 
 // codegen()
 Value *Node::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *Node::codegen"<<std::endl;
+#endif
+
   assert(false); // Never use this function.
   // This is a list.
   return ConstantInt::get(*theContext, APInt(32, 0, true));
 }
 Value *NExpression::codegen() {
+        
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NExpression::codegen"<<std::endl;
+#endif
+
   return ConstantInt::get(*theContext, APInt(32, 0, true));
 }
 Value *NInteger::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NInteger::codegen"<<std::endl;
+#endif
+
   return ConstantInt::get(*theContext, APInt(32, value, true));
 }    
 Value *NFloat::codegen() {
-  // begin
 
-  return nullptr;
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NFloat::codegen"<<std::endl;
+#endif
+
+  // begin
+  return ConstantFP::get(*theContext,APFloat(value));
   // end
 }
 Value *NChar::codegen() {
-  // begin
 
-  return nullptr;
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NChar::codegen"<<std::endl;
+#endif
+
+  // begin
+  return ConstantInt::get(*theContext,APInt(8,value,false));
   // end
 }
 Value *NIdentifier::codegen() {
-  // begin
 
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NIdentifier::codegen"<<std::endl;
+#endif
+
+  // begin
+  AllocaInst *var = namedValues[name];
+  if(var) return builder->CreateLoad(var->getAllocatedType(), var);
+  printSemanticError(1, line, "Undeclared variable " + name);
   return nullptr;
   // end
 }
-Value *NArgs::codegen() { return exp.codegen(); }
+Value *NArgs::codegen() { 
+            
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NArgs::codegen"<<std::endl;
+#endif
+
+  return exp.codegen(); 
+}
 Value *NMethodCall::codegen() {
-  // begin
 
-  return nullptr;
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NMethodCall::codegen"<<std::endl;
+#endif
+
+  // begin
+  Function *func = theModule->getFunction(id.name);
+  if(!func) 
+    printSemanticError(2, line, "Undeclared function " + id.name);
+
+  std::vector<Value *> argV;
+  NArgs *arg = nargs;
+  for(auto &argI : func->args()) {
+    if(!arg) 
+      printSemanticError(8, line, "Too few arguments in function " + id.name);
+    Value *argVal = arg->codegen();
+    if(argVal->getType() != argI.getType()) 
+      printSemanticError(8, line, "Type mismatched for argument " + argI.getName().str() + " in function " + id.name);
+    argV.push_back(argVal);
+    arg = arg->nArgs;
+  }
+  if(arg) 
+    printSemanticError(8, line, "Too many arguments in function " + id.name);
+
+  return builder->CreateCall(func, argV);
   // end
 }
-Value *NParenOperator::codegen() { return exp.codegen(); }
+Value *NParenOperator::codegen() {  
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NParenOperator::codegen"<<std::endl;
+#endif
+
+  return exp.codegen(); 
+}
 Value *NSingleOperator::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NSingleOperator::codegen"<<std::endl;
+#endif
+
   // begin
 
   return nullptr;
   // end
 }
 Value *NBinaryOperator::codegen() {
-  // begin
 
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NBinaryOperator::codegen"<<std::endl;
+#endif
+
+  // begin
+  Value * left = lhs.codegen();
+  Value * right = rhs.codegen();
+  if(name == "AND")
+    return builder->CreateAnd(left,right);
+  if(name == "OR")
+    return builder->CreateOr(left,right);
+  if(name == "PLUS")
+    return builder->CreateAdd(left,right);
+  if(name == "MINUS")
+    return builder->CreateSub(left,right);
+  if(name == "STAR")
+    return builder->CreateMul(left,right);
+  if(name == "DIV")
+    return builder->CreateSDiv(left,right);
+  if(name == "MOD")
+    return builder->CreateSRem(left,right);
+  if(name == "RELOP<=")
+    return builder->CreateICmpSLE(left,right);
+  if(name == "RELOP>=")
+    return builder->CreateICmpSGE(left,right);
+  if(name == "RELOP<")
+    return builder->CreateICmpSLT(left,right);
+  if(name == "RELOP>")
+    return builder->CreateICmpSGT(left,right);
+  if(name == "RELOP==")
+    return builder->CreateICmpEQ(left,right);
+  if(name == "RELOP!=")
+    return builder->CreateICmpNE(left,right);
+  
   return nullptr;
   // end
 }
 Value *NAssignment::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NAssignment::codegen"<<std::endl;
+#endif
+
   // Assignment requires the LHS to be an identifier.
   // begin
+  Value * rightVal = rhs.codegen();
+  if(lhs.name == "")
+    printSemanticError(6, line, "The left-hand side of an assignment must be a variable");
+  AllocaInst *leftVar = namedValues[lhs.name];
+  if(!leftVar)
+    printSemanticError(1, line, "Undeclared variable " + lhs.name);
+  if(leftVar->getAllocatedType() != rightVal->getType())
+    printSemanticError(5, line, "Type mismatch in assignment");
+  if(name == "ASSIGNOP")
+    return builder->CreateStore(rightVal,leftVar);
+  if(name == "PLUSASS")
+    return builder->CreateStore(builder->CreateAdd(leftVar,rightVal),leftVar);
+  if(name == "MINUSASS")
+    return builder->CreateStore(builder->CreateSub(leftVar,rightVal),leftVar);
+  if(name == "STARASS")
+    return builder->CreateStore(builder->CreateMul(leftVar,rightVal),leftVar);
+  if(name == "DIVASS")
+    return builder->CreateStore(builder->CreateSDiv(leftVar,rightVal),leftVar);
 
   return nullptr;
   // end
 }
 Value *NSpecifier::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NSpecifier::codegen"<<std::endl;
+#endif
+
   // begin
 
   return nullptr;
@@ -616,12 +752,23 @@ Type *NSpecifier::getType() {
   return Type::getInt32Ty(*theContext);
 }
 Value *NVarDec::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NVarDec::codegen"<<std::endl;
+#endif
+
   // begin
 
   return nullptr;
   // end
 }
+//函数形参
 Value *NParamDec::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NParamDec::codegen"<<std::endl;
+#endif
+
   // begin
 
   return nullptr;
@@ -633,18 +780,30 @@ std::pair<std::string, Type *> NParamDec::getType() {
   std::pair<std::string, Type *> tmp(varDec.Id.name, nSpecifier.getType());
   return tmp;
 }
+//函数形参组
 Value *NVarList::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NVarList::codegen"<<std::endl;
+#endif
+
   assert(false); // Never use this function.
   // This is a list.
   return ConstantInt::get(*theContext, APInt(32, 0, true));
 }
 Function *NFunDec::funcodegen(Type *retType) {
+    
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Function *NFunDec::funcodegen"<<std::endl;
+#endif
+
   // check if it exists the same name of fun
   if (theModule->getFunction(Id.name)) {
     printSemanticError(4, line, "Redefined " + Id.name);
     return nullptr;
   }
 
+  // change args to vector(LLVM type)
   std::vector<Type *> argsTypes;
   std::vector<std::string> argNames;
   for (NVarList *item = arguments; item; item = item->nVarList) {
@@ -652,51 +811,131 @@ Function *NFunDec::funcodegen(Type *retType) {
     argNames.push_back(tmp.first);
     argsTypes.push_back(tmp.second);
   }
-
+  // create function
+  // define $retType @$Id.name($argsTypes)
   FunctionType *ft = FunctionType::get(retType, argsTypes, false);
   Function *f =
       Function::Create(ft, Function::ExternalLinkage, Id.name, theModule.get());
+  // set name of args
   unsigned idx = 0;
   for (auto &arg : f->args()) {
     arg.setName(argNames[idx++]);
   }
-  return f;
+  return f; 
 }
 Value *NDef::codegen() {
-  // begin
 
-  return nullptr;
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NDef::codegen"<<std::endl;
+#endif
+
+  // begin
+  Type *varType = nSpecifier.getType();
+  for (NDecList *item = nDecList; item; item = item->nDecList) {
+    std::string &varName = item->dec.vardec.Id.name;
+    // check if it exists the same name of var
+    if(curNamedValues.find(varName)!=curNamedValues.end())
+      printSemanticError(3, line, "Redefined " + varName);
+
+    // create var
+    AllocaInst *allocaVar = builder->CreateAlloca(varType, nullptr, varName);
+    if(item->dec.exp != nullptr){
+      Value *initVal = item->dec.exp->codegen();
+      builder->CreateStore(initVal, allocaVar);
+    }
+    // add var to namedValues
+    namedValues[varName] = allocaVar;
+    curNamedValues[varName] = allocaVar;
+  }    
+  return nullptr;  
   // end
 }
 Value *NDefList::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NDefList::codegen"<<std::endl;
+#endif
+
   // begin
+  nDef.codegen();
+  if(nDefList != nullptr) 
+     nDefList->codegen();
+    
+#ifdef DEBUG
+  std::cout<<"[out]file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NDefList::codegen"<<std::endl;
+#endif
 
   return nullptr;
   // end
 }
 Value *NStmtList::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NStmtList::codegen"<<std::endl;
+#endif
+
   auto *retVal = nStmt.codegen();
   if (nStmtList)
     retVal = nStmtList->codegen();
+
+#ifdef DEBUG
+  std::cout<<"[out]file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NStmtList::codegen"<<std::endl;
+#endif
+
   return retVal;
 }
 Value *NCompSt::codegen() {
-  // 自行处理变量作用域的问题
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NCompSt::codegen"<<std::endl;
+#endif
+
+  // 自行处理变量作用域的问题  
   Value *retVal = nullptr;
   if (ndeflist)
     retVal = ndeflist->codegen();
   if (nstmtlist)
     retVal = nstmtlist->codegen();
+
+#ifdef DEBUG
+  std::cout<<"end of NCompSt::codegen"<<std::endl;
+#endif
+
+  // 删除函数内部的变量 (namedValues)
+  for (auto &item : namedValues) 
+    curNamedValues.erase(item.first);
+
+#ifdef DEBUG
+  std::cout<<"[out]file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NCompSt::codegen"<<std::endl;
+#endif
+
   return retVal;
 }
-Value *NExpStmt::codegen() { return exp.codegen(); }
+Value *NExpStmt::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NExpStmt::codegen"<<std::endl;
+#endif
+
+ return exp.codegen(); 
+}
 Value *NCompStStmt::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NCompStStmt::codegen"<<std::endl;
+#endif
+
   // begin
 
   return nullptr;
   // end
 }
 Value *NRetutnStmt::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NRetutnStmt::codegen"<<std::endl;
+#endif
+
   Function *theFun = builder->GetInsertBlock()->getParent();
   BasicBlock *bb = BasicBlock::Create(*theContext, "ret", theFun);
   builder->CreateBr(bb);
@@ -704,12 +943,19 @@ Value *NRetutnStmt::codegen() {
   auto *retVal = exp.codegen();
   // check the return type and fundec type
   // begin
+  if(retVal->getType() != theFun->getReturnType())
+    printSemanticError(7, line, "Type mismatched for return");
 
   // end
-    builder->CreateRet(retVal);
+  builder->CreateRet(retVal);
   return retVal;
 }
 Value *NIfStmt::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NIfStmt::codegen"<<std::endl;
+#endif
+
   Function *theFun = builder->GetInsertBlock()->getParent();
   // begin
 
@@ -717,6 +963,11 @@ Value *NIfStmt::codegen() {
   // end
 }
 Value *NIfElseStmt::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NIfElseStmt::codegen"<<std::endl;
+#endif
+
   Function *theFun = builder->GetInsertBlock()->getParent();
   // begin
 
@@ -724,6 +975,11 @@ Value *NIfElseStmt::codegen() {
   // end
 }
 Value *NWhileStmt::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NWhileStmt::codegen"<<std::endl;
+#endif
+
   Function *theFun = builder->GetInsertBlock()->getParent();
   BasicBlock *condb = BasicBlock::Create(*theContext, "cond", theFun);
   // begin
@@ -732,28 +988,51 @@ Value *NWhileStmt::codegen() {
   // end
 }
 Value *NBreakStmt::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NBreakStmt::codegen"<<std::endl;
+#endif
+
   // begin
 
   return nullptr;
   // end
 }
+
+
+
+//全局变量
 Value *NExtDefVarDec::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NExtDefVarDec::codegen"<<std::endl;
+#endif
+
   // begin
 
   return nullptr;
   // end
 }
-Value *NExtDefFunDec::codegen() {
-  Type *retType = specifier.getType();
 
+
+//函数定义
+Value *NExtDefFunDec::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NExtDefFunDec::codegen"<<std::endl;
+#endif
+
+  Type *retType = specifier.getType();
+  
   Function *f = fundec->funcodegen(retType);
   if (!f) {
     return nullptr;
   }
   assert(compst != nullptr); // Assert compst is not null.
   BasicBlock *bb = BasicBlock::Create(*theContext, "entry", f);
+  // entry:
   builder->SetInsertPoint(bb);
-  namedValues.clear();
+  namedValues.clear(); 
   for (auto &arg : f->args()) {
     // Create an alloca for this variable.
     AllocaInst *alloca =
@@ -785,6 +1064,11 @@ Value *NExtDefFunDec::codegen() {
   return nullptr;
 }
 Value *NExtDefList::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NExtDefList::codegen"<<std::endl;
+#endif
+
   auto *lastCode = nExtDef.codegen();
   // lastCode->print(errs());
   // assert(nExtDefList == nullptr);
@@ -793,6 +1077,11 @@ Value *NExtDefList::codegen() {
   return lastCode;
 }
 Value *NProgram::codegen() {
+
+#ifdef DEBUG
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NProgram::codegen"<<std::endl;
+#endif
+
 
   //默认输出函数putchar
   std::vector<Type *> putArgs;
