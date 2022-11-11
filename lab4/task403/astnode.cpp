@@ -1,6 +1,6 @@
 #include "astnode.h"
 
-// #define DEBUG
+// #define TRACE_FUNC
 
 extern int spaces;
 extern std::unique_ptr<LLVMContext> theContext;
@@ -549,7 +549,7 @@ int NProgram::parse() {
 // codegen()
 Value *Node::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *Node::codegen"<<std::endl;
 #endif
 
@@ -559,7 +559,7 @@ Value *Node::codegen() {
 }
 Value *NExpression::codegen() {
         
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NExpression::codegen"<<std::endl;
 #endif
 
@@ -567,7 +567,7 @@ Value *NExpression::codegen() {
 }
 Value *NInteger::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NInteger::codegen"<<std::endl;
 #endif
 
@@ -575,7 +575,7 @@ Value *NInteger::codegen() {
 }    
 Value *NFloat::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NFloat::codegen"<<std::endl;
 #endif
 
@@ -585,7 +585,7 @@ Value *NFloat::codegen() {
 }
 Value *NChar::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NChar::codegen"<<std::endl;
 #endif
 
@@ -595,7 +595,7 @@ Value *NChar::codegen() {
 }
 Value *NIdentifier::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NIdentifier::codegen"<<std::endl;
 #endif
 
@@ -608,7 +608,7 @@ Value *NIdentifier::codegen() {
 }
 Value *NArgs::codegen() { 
             
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NArgs::codegen"<<std::endl;
 #endif
 
@@ -616,7 +616,7 @@ Value *NArgs::codegen() {
 }
 Value *NMethodCall::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NMethodCall::codegen"<<std::endl;
 #endif
 
@@ -644,7 +644,7 @@ Value *NMethodCall::codegen() {
 }
 Value *NParenOperator::codegen() {  
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NParenOperator::codegen"<<std::endl;
 #endif
 
@@ -652,7 +652,7 @@ Value *NParenOperator::codegen() {
 }
 Value *NSingleOperator::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NSingleOperator::codegen"<<std::endl;
 #endif
 
@@ -663,7 +663,7 @@ Value *NSingleOperator::codegen() {
 }
 Value *NBinaryOperator::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NBinaryOperator::codegen"<<std::endl;
 #endif
 
@@ -702,7 +702,7 @@ Value *NBinaryOperator::codegen() {
 }
 Value *NAssignment::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NAssignment::codegen"<<std::endl;
 #endif
 
@@ -732,7 +732,7 @@ Value *NAssignment::codegen() {
 }
 Value *NSpecifier::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NSpecifier::codegen"<<std::endl;
 #endif
 
@@ -753,7 +753,7 @@ Type *NSpecifier::getType() {
 }
 Value *NVarDec::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NVarDec::codegen"<<std::endl;
 #endif
 
@@ -765,7 +765,7 @@ Value *NVarDec::codegen() {
 //函数形参
 Value *NParamDec::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NParamDec::codegen"<<std::endl;
 #endif
 
@@ -783,7 +783,7 @@ std::pair<std::string, Type *> NParamDec::getType() {
 //函数形参组
 Value *NVarList::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NVarList::codegen"<<std::endl;
 #endif
 
@@ -793,7 +793,7 @@ Value *NVarList::codegen() {
 }
 Function *NFunDec::funcodegen(Type *retType) {
     
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Function *NFunDec::funcodegen"<<std::endl;
 #endif
 
@@ -825,7 +825,7 @@ Function *NFunDec::funcodegen(Type *retType) {
 }
 Value *NDef::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NDef::codegen"<<std::endl;
 #endif
 
@@ -852,7 +852,7 @@ Value *NDef::codegen() {
 }
 Value *NDefList::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NDefList::codegen"<<std::endl;
 #endif
 
@@ -861,7 +861,7 @@ Value *NDefList::codegen() {
   if(nDefList != nullptr) 
      nDefList->codegen();
     
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"[out]file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NDefList::codegen"<<std::endl;
 #endif
 
@@ -870,7 +870,7 @@ Value *NDefList::codegen() {
 }
 Value *NStmtList::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NStmtList::codegen"<<std::endl;
 #endif
 
@@ -878,7 +878,7 @@ Value *NStmtList::codegen() {
   if (nStmtList)
     retVal = nStmtList->codegen();
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"[out]file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NStmtList::codegen"<<std::endl;
 #endif
 
@@ -886,7 +886,7 @@ Value *NStmtList::codegen() {
 }
 Value *NCompSt::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NCompSt::codegen"<<std::endl;
 #endif
 
@@ -897,7 +897,7 @@ Value *NCompSt::codegen() {
   if (nstmtlist)
     retVal = nstmtlist->codegen();
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"end of NCompSt::codegen"<<std::endl;
 #endif
 
@@ -905,7 +905,7 @@ Value *NCompSt::codegen() {
   for (auto &item : namedValues) 
     curNamedValues.erase(item.first);
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"[out]file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NCompSt::codegen"<<std::endl;
 #endif
 
@@ -913,7 +913,7 @@ Value *NCompSt::codegen() {
 }
 Value *NExpStmt::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NExpStmt::codegen"<<std::endl;
 #endif
 
@@ -921,7 +921,7 @@ Value *NExpStmt::codegen() {
 }
 Value *NCompStStmt::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NCompStStmt::codegen"<<std::endl;
 #endif
 
@@ -932,7 +932,7 @@ Value *NCompStStmt::codegen() {
 }
 Value *NRetutnStmt::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NRetutnStmt::codegen"<<std::endl;
 #endif
 
@@ -952,7 +952,7 @@ Value *NRetutnStmt::codegen() {
 }
 Value *NIfStmt::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NIfStmt::codegen"<<std::endl;
 #endif
 
@@ -964,7 +964,7 @@ Value *NIfStmt::codegen() {
 }
 Value *NIfElseStmt::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NIfElseStmt::codegen"<<std::endl;
 #endif
 
@@ -976,7 +976,7 @@ Value *NIfElseStmt::codegen() {
 }
 Value *NWhileStmt::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NWhileStmt::codegen"<<std::endl;
 #endif
 
@@ -989,7 +989,7 @@ Value *NWhileStmt::codegen() {
 }
 Value *NBreakStmt::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NBreakStmt::codegen"<<std::endl;
 #endif
 
@@ -1004,7 +1004,7 @@ Value *NBreakStmt::codegen() {
 //全局变量
 Value *NExtDefVarDec::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NExtDefVarDec::codegen"<<std::endl;
 #endif
 
@@ -1018,7 +1018,7 @@ Value *NExtDefVarDec::codegen() {
 //函数定义
 Value *NExtDefFunDec::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NExtDefFunDec::codegen"<<std::endl;
 #endif
 
@@ -1065,7 +1065,7 @@ Value *NExtDefFunDec::codegen() {
 }
 Value *NExtDefList::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NExtDefList::codegen"<<std::endl;
 #endif
 
@@ -1078,7 +1078,7 @@ Value *NExtDefList::codegen() {
 }
 Value *NProgram::codegen() {
 
-#ifdef DEBUG
+#ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NProgram::codegen"<<std::endl;
 #endif
 
