@@ -600,8 +600,8 @@ Value *NIdentifier::codegen() {
 #endif
 
   // begin
-  AllocaInst *var = namedValues[name];
-  if(var) return builder->CreateLoad(var->getAllocatedType(), var);
+  AllocaInst *var = curNamedValues[name];
+  if(var != nullptr) return builder->CreateLoad(var->getAllocatedType(), var);
   printSemanticError(1, line, "Undeclared variable " + name);
   return nullptr;
   // end
@@ -711,7 +711,7 @@ Value *NAssignment::codegen() {
   Value * rightVal = rhs.codegen();
   if(lhs.name == "")
     printSemanticError(6, line, "The left-hand side of an assignment must be a variable");
-  AllocaInst *leftVar = namedValues[lhs.name];
+  AllocaInst *leftVar = curNamedValues[lhs.name];
   if(!leftVar)
     printSemanticError(1, line, "Undeclared variable " + lhs.name);
   if(leftVar->getAllocatedType() != rightVal->getType())
@@ -823,6 +823,7 @@ Function *NFunDec::funcodegen(Type *retType) {
   }
   return f; 
 }
+// 变量定义
 Value *NDef::codegen() {
 
 #ifdef TRACE_FUNC
@@ -834,7 +835,7 @@ Value *NDef::codegen() {
   for (NDecList *item = nDecList; item; item = item->nDecList) {
     std::string &varName = item->dec.vardec.Id.name;
     // check if it exists the same name of var
-    if(curNamedValues.find(varName)!=curNamedValues.end())
+    if(namedValues.find(varName)!=namedValues.end())
       printSemanticError(3, line, "Redefined " + varName);
 
     // create var
@@ -904,6 +905,7 @@ Value *NCompSt::codegen() {
   // 删除函数内部的变量 (namedValues)
   for (auto &item : namedValues) 
     curNamedValues.erase(item.first);
+    //TODO:::这里有问题，如果是全局变量，会被删除
 
 #ifdef TRACE_FUNC
   std::cout<<"[out]file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NCompSt::codegen"<<std::endl;
@@ -926,8 +928,13 @@ Value *NCompStStmt::codegen() {
 #endif
 
   // begin
-
-  return compst.codegen();
+  std::map<std::string, llvm::AllocaInst *> tmpNamedValues = namedValues;
+  std::map<std::string, llvm::AllocaInst *> tmpCurNamedValues = curNamedValues;
+  namedValues.clear();
+  Value *retVal = compst.codegen();
+  namedValues = tmpNamedValues;
+  curNamedValues = tmpCurNamedValues;
+  return retVal;
   // end
 }
 Value *NRetutnStmt::codegen() {
@@ -961,20 +968,17 @@ Value *NIfStmt::codegen() {
 
   // declare the basic block
   BasicBlock *thenBB = BasicBlock::Create(*theContext,"then",theFun); 
-  BasicBlock *returnBB = BasicBlock::Create(*theContext,"return",theFun); 
+  BasicBlock *endifBB = BasicBlock::Create(*theContext,"endif"); 
 
   // br i1 %cond, label %then, label %return
-  builder->CreateCondBr(exp.codegen(),thenBB,returnBB);
+  builder->CreateCondBr(exp.codegen(),thenBB,endifBB);
   // then:
-  theFun->getBasicBlockList().push_back(thenBB);
   builder->SetInsertPoint(thenBB);
   // excute the then stmt
   stmt.codegen();
-  // br label %return
-  builder->CreateBr(returnBB);
   // return:
-  theFun->getBasicBlockList().push_back(returnBB);
-  builder->SetInsertPoint(returnBB);
+  theFun->getBasicBlockList().push_back(endifBB);
+  builder->SetInsertPoint(endifBB);
 
   return nullptr;
   // end
@@ -990,28 +994,27 @@ Value *NIfElseStmt::codegen() {
 
   // declare the basic block
   BasicBlock *thenBB = BasicBlock::Create(*theContext,"then",theFun);
-  BasicBlock *elseBB = BasicBlock::Create(*theContext,"else",theFun);
-  BasicBlock *returnBB = BasicBlock::Create(*theContext,"return",theFun);
+  BasicBlock *elseBB = BasicBlock::Create(*theContext,"else");
+  BasicBlock *endifBB = BasicBlock::Create(*theContext,"endif");
 
   // br i1 (exp), label %then, label %else
   builder->CreateCondBr(exp.codegen(),thenBB,elseBB);
   // then:
-  theFun->getBasicBlockList().push_back(thenBB);
   builder->SetInsertPoint(thenBB);
   // excute the then stmt
   stmt.codegen();
   // br lable %return
-  builder->CreateBr(returnBB);
+  builder->CreateBr(endifBB);
   // else:
   theFun->getBasicBlockList().push_back(elseBB);
   builder->SetInsertPoint(elseBB);
   // excute the else stmt
   stmt_else.codegen();
   // br lable %return
-  builder->CreateBr(returnBB);
+  builder->CreateBr(endifBB);
   // return:
-  theFun->getBasicBlockList().push_back(returnBB);
-  builder->SetInsertPoint(returnBB);
+  theFun->getBasicBlockList().push_back(endifBB);
+  builder->SetInsertPoint(endifBB);
 
   return nullptr;
   // end
@@ -1027,13 +1030,12 @@ Value *NWhileStmt::codegen() {
   // begin
 
   // declare the basic block
-  BasicBlock *rundBB = BasicBlock::Create(*theContext, "run", theFun);
-  BasicBlock *afterBB = BasicBlock::Create(*theContext, "after", theFun);
+  BasicBlock *rundBB = BasicBlock::Create(*theContext, "run");
+  BasicBlock *afterBB = BasicBlock::Create(*theContext, "after");
 
   // br label %cond
   builder->CreateBr(condb);
   // cond:
-  theFun->getBasicBlockList().push_back(condb);
   builder->SetInsertPoint(condb);
   // br i1 (exp), label %run, label %after
   builder->CreateCondBr(exp.codegen(),rundBB,afterBB);
