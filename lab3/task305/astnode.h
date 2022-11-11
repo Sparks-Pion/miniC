@@ -155,7 +155,7 @@ public:
   NExpression &rhs;
   NAssignment(NExpression &lhs, int op, NExpression &rhs)
       : lhs(lhs), op(op), rhs(rhs) {}
-  NAssignment(std::string &name, NExpression &lhs, int op, NExpression &rhs)
+  NAssignment(std::string name, NExpression &lhs, int op, NExpression &rhs)
       : name(name), lhs(lhs), op(op), rhs(rhs) {}
   int parse();
   int handle() { return 0; }
