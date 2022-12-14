@@ -41,6 +41,7 @@ extern int yylex(void);
 %token <type_char> CHAR
 %token LP RP LC RC LB RB SEMI COMMA     //用bison对该文件编译时，带参数-d，生成的exp.tab.h中给这些单词进行编码，可在lex.l中包含parser.tab.h使用这些单词种类码
 %token DOT PLUS MINUS STAR DIV MOD ASSIGNOP AND OR NOT IF BREAK ELSE WHILE RETURN PLUSASS MINUSASS STARASS DIVASS MODASS PLUSPLUS MINUSMINUS
+%token SPACE
 //由低到高的定义优先级
 %right ASSIGNOP PLUSASS MINUSASS STARASS DIVASS MODASS
 %left OR
@@ -80,7 +81,7 @@ StructSpecifier: STRUCT OptTag LC DefList RC {std::cout<<"StructSpecifier"<<std:
                 | STRUCT Tag {std::cout<<"StructSpecifier"<<std::endl;}
                 ;
 
-OptTag: ID {std::cout<<"OptTag"<<std::endl;}
+OptTag: ID {std::cout<<"OptTag"<<yylineno<<std::endl;}
          | /*empty*/ {std::cout<<"OptTag"<<std::endl;}
          ;
     

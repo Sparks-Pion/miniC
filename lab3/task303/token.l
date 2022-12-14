@@ -40,8 +40,7 @@ float  ([0-9]*\.[0-9]+)|([0-9]+\.)|([0-9]*\.[0-9]+e(-)?[0-9]+)
 "else"       {return ELSE;}
 "while"      {return WHILE;}
 "break"		 {return BREAK;}
-{id}         {strcpy(yylval.type_id,  yytext); return ID;/*由于关键字的形式也符合表示符的规则，所以把关键字的处理全部放在标识符的前面，优先识别*/}
-
+{id}         {printf("id: %d\n",yylineno);strcpy(yylval.type_id,  yytext); return ID;/*由于关键字的形式也符合表示符的规则，所以把关键字的处理全部放在标识符的前面，优先识别*/}
 ";"			 {return SEMI;}
 ","			 {return COMMA;}
 ">"|"<"|">="|"<="|"=="|"!=" {strcpy(yylval.type_id, yytext);return RELOP;}
@@ -75,15 +74,14 @@ float  ([0-9]*\.[0-9]+)|([0-9]+\.)|([0-9]*\.[0-9]+e(-)?[0-9]+)
 
 "#".*		{printf("预定义或头文件\n");}
 
-
 [\n]		{yycolumn=1;}
 [ \r\t]		{/*printf("过滤空格等字符\n");*/}
 "//".*$	{}
 \/\*([^*]|\*+[^/*])*\*+\/	{}
 
 0[0-9]+ { printf("Error type A at Line %d: Illegal octal number '%s'\n",yylineno,yytext);}
-0x[0-9a-zA-Z]* { printf("Error type A at Line %d: Illegal hexadecimal number '%s'\n",yylineno,yytext);}
-
+0x[0-9a-zA-Z]* { printf("Error type A at  %d: Illegal hexadecimal number '%s'\n",yylineno,yytext);}
+Line
 
 [0-9][a-zA-Z0-9_]* {printf("Error: Illegal ID \"%s\"\t at Line %d\n",yytext,yylineno);\
 					strcpy(yylval.type_id,  yytext); return ID;/*标识非法id,但是仍旧当做正常id进行分析*/}

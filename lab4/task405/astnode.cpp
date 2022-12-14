@@ -9,7 +9,7 @@ extern std::unique_ptr<IRBuilder<>> builder;
 extern std::map<std::string, AllocaInst *> namedValues; // 存当前函数局部变量
 extern std::unique_ptr<legacy::FunctionPassManager> theFPM;
 extern int grammererror;
-extern std::map<std::string, AllocaInst *> curNamedValues; // 存当前所有变量
+extern std::map<std::string, AllocaInst *> curNamedValues; // 存当前外层变量
 
 extern BasicBlock *continueBasicBlock;
 void printspaces() {
@@ -600,8 +600,15 @@ Value *NIdentifier::codegen() {
 #endif
 
   // begin
-  AllocaInst *var = curNamedValues[name];
+  
+  // 先找局部变量
+  AllocaInst *var = namedValues[name];
   if(var != nullptr) return builder->CreateLoad(var->getAllocatedType(), var);
+  
+  // 再找全局变量
+  var= curNamedValues[name];
+  if(var != nullptr) return builder->CreateLoad(var->getAllocatedType(), var);
+
   printSemanticError(1, line, "Undeclared variable " + name);
   return nullptr;
   // end
@@ -711,7 +718,9 @@ Value *NAssignment::codegen() {
   Value * rightVal = rhs.codegen();
   if(lhs.name == "")
     printSemanticError(6, line, "The left-hand side of an assignment must be a variable");
-  AllocaInst *leftVar = curNamedValues[lhs.name];
+  AllocaInst *leftVar = namedValues[lhs.name];
+  if(!leftVar)
+    leftVar = curNamedValues[lhs.name];
   if(!leftVar)
     printSemanticError(1, line, "Undeclared variable " + lhs.name);
   if(leftVar->getAllocatedType() != rightVal->getType())
@@ -846,7 +855,6 @@ Value *NDef::codegen() {
     }
     // add var to namedValues
     namedValues[varName] = allocaVar;
-    curNamedValues[varName] = allocaVar;
   }    
   return nullptr;  
   // end
@@ -885,13 +893,14 @@ Value *NStmtList::codegen() {
 
   return retVal;
 }
+
+// 所有的大括号
 Value *NCompSt::codegen() {
 
 #ifdef TRACE_FUNC
   std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NCompSt::codegen"<<std::endl;
 #endif
 
-  // 自行处理变量作用域的问题  
   Value *retVal = nullptr;
   if (ndeflist)
     retVal = ndeflist->codegen();
@@ -901,11 +910,6 @@ Value *NCompSt::codegen() {
 #ifdef TRACE_FUNC
   std::cout<<"end of NCompSt::codegen"<<std::endl;
 #endif
-
-  // 删除函数内部的变量 (namedValues)
-  for (auto &item : namedValues) 
-    curNamedValues.erase(item.first);
-    //TODO:::这里有问题，如果是全局变量，会被删除
 
 #ifdef TRACE_FUNC
   std::cout<<"[out]file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NCompSt::codegen"<<std::endl;
@@ -930,6 +934,8 @@ Value *NCompStStmt::codegen() {
   // begin
   std::map<std::string, llvm::AllocaInst *> tmpNamedValues = namedValues;
   std::map<std::string, llvm::AllocaInst *> tmpCurNamedValues = curNamedValues;
+  for(auto &item: namedValues)
+    curNamedValues[item.first] = item.second;
   namedValues.clear();
   Value *retVal = compst.codegen();
   namedValues = tmpNamedValues;
@@ -1002,21 +1008,25 @@ Value *NIfElseStmt::codegen() {
   // then:
   builder->SetInsertPoint(thenBB);
   // excute the then stmt
-  stmt.codegen();
+  Value *Value1 = stmt.codegen();
   // br lable %return
   builder->CreateBr(endifBB);
   // else:
   theFun->getBasicBlockList().push_back(elseBB);
   builder->SetInsertPoint(elseBB);
   // excute the else stmt
-  stmt_else.codegen();
+  Value *Value2 = stmt_else.codegen();
   // br lable %return
   builder->CreateBr(endifBB);
   // return:
   theFun->getBasicBlockList().push_back(endifBB);
   builder->SetInsertPoint(endifBB);
 
-  return nullptr;
+  // 判断是否有返回值
+  if(Value1 == nullptr || Value2 == nullptr)
+    return nullptr;
+  else 
+    return Value1;
   // end
 }
 Value *NWhileStmt::codegen() {
@@ -1075,7 +1085,6 @@ Value *NExtDefVarDec::codegen() {
 #endif
 
   // begin
-
   return nullptr;
   // end
 }
@@ -1097,9 +1106,14 @@ Value *NExtDefFunDec::codegen() {
   assert(compst != nullptr); // Assert compst is not null.
   BasicBlock *bb = BasicBlock::Create(*theContext, "entry", f);
   // entry:
-  
   builder->SetInsertPoint(bb);
-  namedValues.clear(); 
+  // 变量处理
+  std::map<std::string, llvm::AllocaInst *> tmpNamedValues = namedValues;
+  std::map<std::string, llvm::AllocaInst *> tmpCurNamedValues = curNamedValues;
+  for(auto &item: namedValues)
+    curNamedValues[item.first] = item.second;
+  namedValues.clear();
+   
   for (auto &arg : f->args()) {
     // Create an alloca for this variable.
     AllocaInst *alloca =
@@ -1113,11 +1127,12 @@ Value *NExtDefFunDec::codegen() {
     builder->CreateStore(&arg, alloca);
     // Add arguments to variable symbol table.
     namedValues[std::string(arg.getName())] = alloca;
-    curNamedValues[std::string(arg.getName())] = alloca;
   }
   if (Value *retVal = compst->codegen()) {
     // Finish off the function.
-
+    // 变量处理
+    namedValues = tmpNamedValues;
+    curNamedValues = tmpCurNamedValues;
     // Validate the generated code, checking for consistency.
     verifyFunction(*f);
 
@@ -1126,6 +1141,10 @@ Value *NExtDefFunDec::codegen() {
     return f;
   }
   // Error reading body, remove function.
+#ifdef TRACE_FUNC
+  std::cout<<"file: "<<__FILE__<<":"<<__LINE__<<" fuc: "<<"Value *NExtDefFunDec::codegen::error"<<std::endl;
+#endif
+
   f->eraseFromParent();
 
   return nullptr;

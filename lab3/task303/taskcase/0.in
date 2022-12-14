@@ -1,4 +1,6 @@
-struct Complex
+struct Complex 
+
+
 {
  float real,image;
 };
